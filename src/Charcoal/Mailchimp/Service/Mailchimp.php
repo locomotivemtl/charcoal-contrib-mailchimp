@@ -1,9 +1,10 @@
 <?php
 
-namespace Charcoal\Admin\Service;
+namespace Charcoal\Mailchimp\Service;
 
 use Exception;
 use RuntimeException;
+use stdClass;
 
 /**
  * Mailchimp helper
@@ -29,16 +30,18 @@ class Mailchimp
     protected $apiKey;
 
     /**
-     * @param Boolean $bool Verify ssl state.
+     * @param boolean $bool Verify ssl state.
+     * @return self
      */
     public function setVerifySsl($bool)
     {
         $this->verifySsl = $bool;
+
         return $this;
     }
 
     /**
-     * @return Boolean Verify ssl.
+     * @return boolean Verify ssl.
      */
     public function verifySsl()
     {
@@ -46,16 +49,18 @@ class Mailchimp
     }
 
     /**
-     * @param Integer $timeout Timeout.
+     * @param integer $timeout Timeout.
+     * @return self
      */
     public function setTimeout($timeout)
     {
         $this->timeout = $timeout;
+
         return $this;
     }
 
     /**
-     * @return Integer Timeout..
+     * @return integer Timeout.
      */
     public function timeout()
     {
@@ -64,6 +69,8 @@ class Mailchimp
 
     /**
      * @param string $key Api key.
+     * @return self
+     * @throws RuntimeException When the api key is invalid.
      */
     public function setApiKey($key)
     {
@@ -74,17 +81,20 @@ class Mailchimp
         }
 
         $this->apiKey = $key;
+
         return $this;
     }
 
     /**
      * @return string Api key.
+     * @throws Exception When no api key is defined.
      */
     public function apiKey()
     {
         if (!$this->apiKey) {
             throw new Exception('No api key defined.');
         }
+
         return $this->apiKey;
     }
 
@@ -98,22 +108,23 @@ class Mailchimp
         $key   = $this->apiKey();
         $split = explode('-', $key);
         $dc    = $split[1];
+
         return strtr('https://<dc>.api.mailchimp.com/3.0/', ['<dc>' => $dc]);
     }
 
     /**
      * Send the actual request
-     * @param  string $verb   Put,Patch,Get,Post,Delete.
-     * @param  string $method Method URL such as lists/{id}/members.
-     * @param  array  $opts   Arguments to be sent to the endpoint.
-     * @return StdClass       Json_decode response without headers.
+     * @param string $verb   Put,Patch,Get,Post,Delete.
+     * @param string $method Method URL such as lists/{id}/members.
+     * @param array  $opts   Arguments to be sent to the endpoint.
+     * @return stdClass      Json_decode response without headers.
      */
-    private function sendRequest($verb, $method, $opts)
+    private function sendRequest($verb, $method, array $opts)
     {
-        $timeout    = $this->timeout();
-        $url        = $this->apiEndpoint().$method;
-        $ssl        = $this->verifySsl();
-        $key        = $this->apiKey();
+        $timeout = $this->timeout();
+        $url     = $this->apiEndpoint().$method;
+        $ssl     = $this->verifySsl();
+        $key     = $this->apiKey();
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -122,9 +133,8 @@ class Mailchimp
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Accept: application/vnd.api+json',
             'Content-Type: application/vnd.api+json',
-            strtr('Authorization: apikey %key', [ '%key' => $key ])
+            strtr('Authorization: apikey %key', ['%key' => $key])
         ]);
-
 
         // Remove header from response
         curl_setopt($ch, CURLOPT_HEADER, false);
@@ -158,7 +168,7 @@ class Mailchimp
                 $query = $url;
                 if (!empty($opts)) {
                     $query = http_build_query($opts, '', '&');
-                    $query .=  '?' . $query;
+                    $query .= '?'.$query;
                 }
                 curl_setopt($ch, CURLOPT_URL, $query);
                 break;
@@ -171,17 +181,18 @@ class Mailchimp
         $response = curl_exec($ch);
 
         curl_close($ch);
+
         return json_decode($response);
     }
 
     /**
      * Shorthand to sendRequest('get', $method, $args).
      *
-     * @param  string $method Api method.
-     * @param  array  $args   Arguments to send to the endpoint.
-     * @return StdClass       Json decoded response without headers.
+     * @param string $method Api method.
+     * @param array  $args   Arguments to send to the endpoint.
+     * @return stdClass      Json decoded response without headers.
      */
-    public function get($method, $args = [])
+    public function get($method, array $args = [])
     {
         return $this->sendRequest('get', $method, $args);
     }
@@ -189,11 +200,11 @@ class Mailchimp
     /**
      * Shorthand to sendRequest('post', $method, $args).
      *
-     * @param  string $method Api method.
-     * @param  array  $args   Arguments to send to the endpoint.
-     * @return StdClass       Json decoded response without headers.
+     * @param string $method Api method.
+     * @param array  $args   Arguments to send to the endpoint.
+     * @return stdClass       Json decoded response without headers.
      */
-    public function post($method, $args = [])
+    public function post($method, array $args = [])
     {
         return $this->sendRequest('post', $method, $args);
     }
@@ -201,11 +212,11 @@ class Mailchimp
     /**
      * Shorthand to sendRequest('put', $method, $args).
      *
-     * @param  string $method Api method.
-     * @param  array  $args   Arguments to send to the endpoint.
-     * @return StdClass       Json decoded response without headers.
+     * @param string $method Api method.
+     * @param array  $args   Arguments to send to the endpoint.
+     * @return stdClass       Json decoded response without headers.
      */
-    public function put($method, $args = [])
+    public function put($method, array $args = [])
     {
         return $this->sendRequest('put', $method, $args);
     }
@@ -213,11 +224,11 @@ class Mailchimp
     /**
      * Shorthand to sendRequest('patch', $method, $args).
      *
-     * @param  string $method Api method.
-     * @param  array  $args   Arguments to send to the endpoint.
-     * @return StdClass       Json decoded response without headers.
+     * @param string $method Api method.
+     * @param array  $args   Arguments to send to the endpoint.
+     * @return stdClass       Json decoded response without headers.
      */
-    public function patch($method, $args = [])
+    public function patch($method, array $args = [])
     {
         return $this->sendRequest('patch', $method, $args);
     }
@@ -225,11 +236,11 @@ class Mailchimp
     /**
      * Shorthand to sendRequest('delete', $method, $args).
      *
-     * @param  string $method Api method.
-     * @param  array  $args   Arguments to send to the endpoint.
-     * @return StdClass       Json decoded response without headers.
+     * @param string $method Api method.
+     * @param array  $args   Arguments to send to the endpoint.
+     * @return stdClass       Json decoded response without headers.
      */
-    public function delete($method, $args = [])
+    public function delete($method, array $args = [])
     {
         return $this->sendRequest('delete', $method, $args);
     }
