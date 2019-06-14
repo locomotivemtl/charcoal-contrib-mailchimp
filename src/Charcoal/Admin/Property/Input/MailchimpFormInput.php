@@ -2,8 +2,6 @@
 
 namespace Charcoal\Admin\Property\Input;
 
-use Charcoal\Admin\Property\Input\MailchimpInput;
-
 /**
  * MailchimpList input.
  * Finds the available list for a given account (api key).
@@ -80,10 +78,10 @@ class MailchimpFormInput extends MailchimpInput
     protected function defaultOptions()
     {
         return [
-            'title_pattern'   => '{{header.text}}',
-            'value_pattern'   => '{{signup_form_url}}',
-            'label_pattern'   => '{{header.text}}',
-            'subtext_pattern' => 'Form URL: {{signup_form_url}}'
+            'title_pattern'    => '{{header.text}}',
+            'value_pattern'    => '{{signup_form_url}}',
+            'label_pattern'    => '{{header.text}}',
+            'subtext_pattern'  => 'Form URL: {{signup_form_url}}'
         ];
     }
 

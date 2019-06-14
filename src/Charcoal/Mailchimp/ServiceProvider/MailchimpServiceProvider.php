@@ -2,6 +2,7 @@
 
 namespace Charcoal\Mailchimp\ServiceProvider;
 
+use Charcoal\Mailchimp\Resources\Lists;
 use Charcoal\Mailchimp\Service\Mailchimp;
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
@@ -31,5 +32,31 @@ class MailchimpServiceProvider implements ServiceProviderInterface
 
             return $mailchimp;
         };
+
+        /**
+         * Mailchimp List facade
+         *
+         * @param Container $container
+         * @return Lists
+         */
+        $container['mailchimp/lists'] = function (Container $container) {
+            return new Lists(
+                ['mailchimp' => $container['mailchimp']]
+            );
+        };
+
+        /**
+         * Mailchimp Members facade
+         *
+         * @param Container $container
+         * @return Lists\Members
+         */
+        $container['mailchimp/lists/members'] = function (Container $container) {
+            return new Lists\Members(
+                ['mailchimp' => $container['mailchimp']]
+            );
+        };
+
+
     }
 }

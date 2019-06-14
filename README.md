@@ -46,73 +46,142 @@ $ composer require locomotivemtl/charcoal-contrib-mailchimp
 -   [**PHP 5.6+**](https://php.net): _PHP 7_ is recommended.
 
 
-
-#### PSR
-
---TBD--
-
-
-
-## Service Provider
-
-### Parameters
-
---TBD--
-
-
-
-### Services
-
---TBD--
-
-
-
 ## Configuration
 
---TBD--
+Include the mailchimp module in the projects's config file.
+This will provide everything needed for [charcoal-contrib-mailchimp] to work properly.
 
+```json
+{
+    "modules": {
+       "charcoal/mailchimp/mailchimp": {}
+    }
+}
+```
+
+Add the api key (Account > Settings > Extra > Api keys) in the config apis:
+
+```json
+"apis": {
+    "mailchimp": {
+        "key": "myapikey-usXX"
+    }
+}
+```
 
 
 ## Usage
 
---TBD--
+[charcoal-contrib-mailchimp] comes with a set of tools to help setup a newsletter subscription.
 
+### Properties
 
+There are 2 different property types you can use to either select an audience or a signup form for a
+given audience.
 
-## Development
-
-To install the development environment:
-
-```shell
-$ composer install
+#### Mailchimp List
+Set your property as follow.
+```json
+    "type": "string",
+    "input_type": "charcoal/admin/property/input/mailchimp-list",
+    "mailchimp_options": {
+        "query_parameters": {
+            "count": 20
+        }
+    }
+```
+You can customize the displayed label, the displayed title, the value and the subtext pattern. 
+It is also possible to add query parameters (see [Doc](https://developer.mailchimp.com/documentation/mailchimp/reference/lists/#%20)) Default as follow:
+```json
+"mailchimp_options": {
+    "title_pattern": "{{name}}",
+    "value_pattern": "{{id}}",
+    "label_pattern": "{{name}}",
+    "subtext_pattern": "Web ID: {{id}}",
+    "query_parameters": []
+}
 ```
 
-To run the scripts (phplint, phpcs, and phpunit):
-
-```shell
-$ composer test
+#### Mailchimp Signup Form
+```json
+    "type": "string",
+    "input_type": "charcoal/admin/property/input/mailchimp-form",
+    "mailchimp_options": {
+        [...]
+    }
+```
+You can customize the displayed label, the displayed title, the value and the subtext pattern. 
+Default as follow:
+```json
+"mailchimp_options": {
+    "title_pattern": "{{header.text}}",
+    "value_pattern": "{{signup_form_url}}",
+    "label_pattern": "{{header.text}}",
+    "subtext_pattern": "Form URL: {{signup_form_url}}"
+}
 ```
 
+### User subscription
 
+```php
 
-### API Documentation
+class FooBar
+{
+    use MailchimpAwareTrait;
+    [...]
 
--   The auto-generated `phpDocumentor` API documentation is available at:  
-    [https://locomotivemtl.github.io/charcoal-contrib-mailchimp/docs/master/](https://locomotivemtl.github.io/charcoal-contrib-mailchimp/docs/master/)
--   The auto-generated `apigen` API documentation is available at:  
-    [https://codedoc.pub/locomotivemtl/charcoal-contrib-mailchimp/master/](https://codedoc.pub/locomotivemtl/charcoal-contrib-mailchimp/master/index.html)
+    public function setDependencies(Container $container)
+    {
+        $this->setMailchimpListsMembers($container['mailchimp/lists/members']);
+        [...]
+    }
+    
+    public function run()
+    {
+        $user = [
+            'email_address' => 'email@example.com',
+            'status' => 'pending',
+            'merge_fields' => [
+                'FNAME' => 'John',
+                'LNAME' => 'Doe'
+            ]
+        ];
+        
+        // Set list ID
+        $listId = 'a4029db2d';
+        $this->mailchimpListsMembers()->setListId($listId);
+        
+        // Add/Create user
+        $results = $this->mailchimpListsMembers()->add($user);
+        
+        // Add or Update user
+        $results = $this->mailchimpListsMembers()->addOrUpdate($user);
+        
+        // Get a user's informations
+        $results = $this->mailchimpListsMembers()->get('email@example.com');        
+        
+        // Delete a user from a list
+        $results = $this->mailchimpListsMembers()->remove('email@example.com');
+    }
+}
 
+```
 
+The mailchimp service is standalone and can be used directly if you know the endpoints by using the post, patch, get,
+put and delete methods.
 
-### Development Dependencies
+```php
+// Get lists members
+$this->mailchimp()->get('lists/{list_id}/members');
 
--   [php-coveralls/php-coveralls][phpcov]
--   [phpunit/phpunit][phpunit]
--   [squizlabs/php_codesniffer][phpcs]
+// Add member to list
+$this->mailchimp()->post('list/{list_id}/members', [ 
+    'email_address' => 'email@example.com',
+    'status' => 'pending'
+]);
+```
 
-
-
-### Coding Style
+## Coding Style
 
 The charcoal-contrib-mailchimp module follows the Charcoal coding-style:
 

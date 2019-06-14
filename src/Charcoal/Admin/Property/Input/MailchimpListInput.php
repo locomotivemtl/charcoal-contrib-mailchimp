@@ -2,7 +2,6 @@
 
 namespace Charcoal\Admin\Property\Input;
 
-use Charcoal\Admin\Property\Input\MailchimpInput;
 use Generator;
 
 /**
@@ -57,10 +56,11 @@ class MailchimpListInput extends MailchimpInput
     protected function defaultOptions()
     {
         return [
-            'title_pattern'   => '{{name}}',
-            'value_pattern'   => '{{id}}',
-            'label_pattern'   => '{{name}}',
-            'subtext_pattern' => 'Web ID: {{id}}'
+            'title_pattern'    => '{{name}}',
+            'value_pattern'    => '{{id}}',
+            'label_pattern'    => '{{name}}',
+            'subtext_pattern'  => 'Web ID: {{id}}',
+            'query_parameters' => []
         ];
     }
 
@@ -83,14 +83,8 @@ class MailchimpListInput extends MailchimpInput
 
         $opts = $this->mailchimpOptions();
 
-        // Override key at this point if you want to.
-        // Defaults to config.apis.mailchimp.key
-        if (isset($opts['api_key'])) {
-            $this->mailchimp()->setApiKey($opts['api_key']);
-        }
-
         // Get the available list from the mailchimp api.
-        $list = $this->mailchimp()->get('lists', []);
+        $list = $this->mailchimp()->get('lists', $opts['query_parameters']);
 
         foreach ($list->lists as $l) {
             // Render the templates.

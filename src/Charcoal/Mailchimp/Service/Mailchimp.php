@@ -114,6 +114,7 @@ class Mailchimp
 
     /**
      * Send the actual request
+     *
      * @param string $verb   Put,Patch,Get,Post,Delete.
      * @param string $method Method URL such as lists/{id}/members.
      * @param array  $opts   Arguments to be sent to the endpoint.
@@ -122,7 +123,7 @@ class Mailchimp
     private function sendRequest($verb, $method, array $opts)
     {
         $timeout = $this->timeout();
-        $url     = $this->apiEndpoint().$method;
+        $url     = $this->apiEndpoint() . $method;
         $ssl     = $this->verifySsl();
         $key     = $this->apiKey();
 
@@ -167,9 +168,9 @@ class Mailchimp
             case 'get':
                 $query = $url;
                 if (!empty($opts)) {
-                    $query = http_build_query($opts, '', '&');
-                    $query .= '?'.$query;
+                    $query = $url . '?' . http_build_query($opts, '', '&');
                 }
+
                 curl_setopt($ch, CURLOPT_URL, $query);
                 break;
 
