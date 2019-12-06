@@ -75,7 +75,7 @@ class MailchimpListInput extends MailchimpInput
      */
     public function choices()
     {
-        if ($this->p()->allowNull() && !$this->p()->multiple()) {
+        if ($this->p()->getAllowNull() && !$this->p()->getMultiple()) {
             $prepend = $this->parseChoice('', $this->emptyChoice());
 
             yield $prepend;
