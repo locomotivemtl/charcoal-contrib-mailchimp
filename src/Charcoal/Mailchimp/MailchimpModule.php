@@ -22,7 +22,7 @@ class MailchimpModule extends AbstractModule
         $container = $this->app()->getContainer();
 
         $mailchimpServiceProvider = new MailchimpServiceProvider();
-        $container->register($mailchimpServiceProvider);
+        $mailchimpServiceProvider->register($container);
 
         return $this;
     }
