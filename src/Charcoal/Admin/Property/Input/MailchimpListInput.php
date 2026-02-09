@@ -2,29 +2,25 @@
 
 namespace Charcoal\Admin\Property\Input;
 
-use Generator;
-
 /**
- * MailchimpList input.
- * Finds the available list for a given account (api key).
+ * Mailchimp List property input.
+ *
+ * Allows one to select an available Mailchimp List.
  */
 class MailchimpListInput extends MailchimpInput
 {
-    /**
-     * @var array $mailchimOptions
-     */
-    protected $mailchimpOptions;
+    protected ?array $mailchimpOptions = null;
 
     /**
      * Mailchimp options
-     * Defaults to defaultOptions when none given.
-     * Merged with default options in setMailchimpOptions.
      *
-     * @return array Options.
+     * Defaults to defaultOptions when none given.
+     *
+     * Merged with default options in setMailchimpOptions.
      */
-    protected function mailchimpOptions()
+    protected function mailchimpOptions(): array
     {
-        if (!$this->mailchimpOptions) {
+        if ($this->mailchimpOptions === null) {
             return $this->defaultOptions();
         }
 
@@ -32,16 +28,15 @@ class MailchimpListInput extends MailchimpInput
     }
 
     /**
-     * Set mail chimp options
-     * You can set the `api_key` at this point, which is useful if
-     * you have multiple api keys you need to set on multiple properties.
-     * Default api key is set in the `ServiceProvider` that includes
-     * Mailchimp and finds its source in the config of the site (apis.mailchimp.key).
+     * Set Mailchimp options
      *
-     * @param array $options Mailchimp property input options.
-     * @return self
+     * You can set the `api_key` at this point, which is useful if
+     * you have multiple API keys you need to set on multiple properties.
+     *
+     * Default API key is set in the `ServiceProvider` that includes
+     * Mailchimp and finds its source in the config of the site (apis.mailchimp.key).
      */
-    public function setMailchimpOptions(array $options = [])
+    public function setMailchimpOptions(array $options = []): self
     {
         $this->mailchimpOptions = array_merge($this->defaultOptions(), $options);
 
@@ -50,10 +45,8 @@ class MailchimpListInput extends MailchimpInput
 
     /**
      * Default options for the plugin, such as patterns.
-     *
-     * @return array Options.
      */
-    protected function defaultOptions()
+    protected function defaultOptions(): array
     {
         return [
             'title_pattern'    => '{{name}}',
@@ -66,12 +59,14 @@ class MailchimpListInput extends MailchimpInput
 
     /**
      * Formats response from mailchimp as seen here:
-     * http://developer.mailchimp.com/documentation/mailchimp/reference/lists/
+     *
+     * {@link http://developer.mailchimp.com/documentation/mailchimp/reference/lists/}
+     *
      * Value, title, label and subtext are rendered on the response object. You
      * can use any properties from the `Response body parameters` defined in
      * the previous link.
      *
-     * @return Generator Formatted choices.
+     * @return iterable
      */
     public function choices()
     {
@@ -83,25 +78,24 @@ class MailchimpListInput extends MailchimpInput
 
         $opts = $this->mailchimpOptions();
 
-        // Get the available list from the mailchimp api.
+        // Get the available list from the Mailchimp API.
         $list = $this->mailchimp()->get('lists', $opts['query_parameters']);
 
-        foreach ($list->lists as $l) {
-            // Render the templates.
-            $title   = $this->view()->renderTemplate($opts['title_pattern'], $l);
-            $label   = $this->view()->renderTemplate($opts['label_pattern'], $l);
-            $value   = $this->view()->renderTemplate($opts['value_pattern'], $l);
-            $subtext = $this->view()->renderTemplate($opts['subtext_pattern'], $l);
+        foreach ($list->lists as $list) {
+            $title   = $this->view()->renderTemplate($opts['title_pattern'], $list);
+            $label   = $this->view()->renderTemplate($opts['label_pattern'], $list);
+            $value   = $this->view()->renderTemplate($opts['value_pattern'], $list);
+            $subtext = $this->view()->renderTemplate($opts['subtext_pattern'], $list);
 
             $out = [
-                'id'      => $l->id,
+                'id'      => $list->id,
                 'value'   => $value,
                 'title'   => $title,
                 'label'   => $label,
-                'subtext' => $subtext
+                'subtext' => $subtext,
             ];
 
-            yield $this->parseChoice($l->id, $out);
+            yield $this->parseChoice($list->id, $out);
         }
     }
 }

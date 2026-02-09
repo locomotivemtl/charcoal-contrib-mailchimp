@@ -3,31 +3,26 @@
 namespace Charcoal\Admin\Property\Input;
 
 /**
- * MailchimpList input.
- * Finds the available list for a given account (api key).
+ * Mailchimp List Sign-up property input.
+ *
+ * Allows one to select an available Mailchimp List's sign-up form.
  */
 class MailchimpFormInput extends MailchimpInput
 {
-    /**
-     * @var array $mailchimOptions
-     */
-    protected $mailchimpOptions;
+    protected ?array $mailchimpOptions = null;
 
-    /**
-     * @var string $mailchimpListId
-     */
-    protected $mailchimpListId;
+    protected ?string $mailchimpListId = null;
 
     /**
      * Mailchimp options
-     * Defaults to defaultOptions when none given.
-     * Merged with default options in setMailchimpOptions.
      *
-     * @return array Options.
+     * Defaults to defaultOptions when none given.
+     *
+     * Merged with default options in setMailchimpOptions.
      */
-    protected function mailchimpOptions()
+    protected function mailchimpOptions(): array
     {
-        if (!$this->mailchimpOptions) {
+        if ($this->mailchimpOptions === null) {
             return $this->defaultOptions();
         }
 
@@ -35,35 +30,27 @@ class MailchimpFormInput extends MailchimpInput
     }
 
     /**
-     * Set mail chimp options
-     * You can set the `api_key` at this point, which is useful if
-     * you have multiple api keys you need to set on multiple properties.
-     * Default api key is set in the `ServiceProvider` that includes
-     * Mailchimp and finds its source in the config of the site (apis.mailchimp.key).
+     * Set Mailchimp options
      *
-     * @param array $options Mailchimp property input options.
-     * @return self
+     * You can set the `api_key` at this point, which is useful if
+     * you have multiple API keys you need to set on multiple properties.
+     *
+     * Default API key is set in the `ServiceProvider` that includes
+     * Mailchimp and finds its source in the config of the site (apis.mailchimp.key).
      */
-    public function setMailchimpOptions(array $options = [])
+    public function setMailchimpOptions(array $options = []): self
     {
         $this->mailchimpOptions = array_merge($this->defaultOptions(), $options);
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function mailchimpListId()
+    public function mailchimpListId(): ?string
     {
         return $this->mailchimpListId;
     }
 
-    /**
-     * @param string $mailchimpListId MailchimpListId for MailchimpFormInput.
-     * @return self
-     */
-    public function setMailchimpListId($mailchimpListId)
+    public function setMailchimpListId(?string $mailchimpListId): self
     {
         $this->mailchimpListId = $this->renderTemplate($mailchimpListId);
 
@@ -72,31 +59,31 @@ class MailchimpFormInput extends MailchimpInput
 
     /**
      * Default options for the plugin, such as patterns.
-     *
-     * @return array Options.
      */
-    protected function defaultOptions()
+    protected function defaultOptions(): array
     {
         return [
             'title_pattern'    => '{{header.text}}',
             'value_pattern'    => '{{signup_form_url}}',
             'label_pattern'    => '{{header.text}}',
-            'subtext_pattern'  => 'Form URL: {{signup_form_url}}'
+            'subtext_pattern'  => 'Form URL: {{signup_form_url}}',
         ];
     }
 
     /**
-     * Formats response from mailchimp as seen here:
-     * http://developer.mailchimp.com/documentation/mailchimp/reference/lists/
+     * Formats response from Mailchimp as seen here:
+     *
+     * {@link http://developer.mailchimp.com/documentation/mailchimp/reference/lists/}
+     *
      * Value, title, label and subtext are rendered on the response object. You
      * can use any properties from the `Response body parameters` defined in
      * the previous link.
      *
-     * @return array Formatted choices.
+     * @return iterable
      */
     public function choices()
     {
-        if ($this->p()->allowNull() && !$this->p()->multiple()) {
+        if ($this->p()->getAllowNull() && !$this->p()->getMultiple()) {
             $prepend = $this->parseChoice('', $this->emptyChoice());
 
             yield $prepend;
@@ -121,25 +108,24 @@ class MailchimpFormInput extends MailchimpInput
             $this->mailchimpListId()
         );
 
-        // Get the available list from the mailchimp api.
+        // Get the available list from the Mailchimp API.
         $forms = $this->mailchimp()->get($endpoint, []);
 
-        foreach ($forms->signup_forms as $f) {
-            // Render the templates.
-            $title   = $this->view()->renderTemplate($opts['title_pattern'], $f);
-            $label   = $this->view()->renderTemplate($opts['label_pattern'], $f);
-            $value   = $this->view()->renderTemplate($opts['value_pattern'], $f);
-            $subtext = $this->view()->renderTemplate($opts['subtext_pattern'], $f);
+        foreach ($forms->signup_forms as $form) {
+            $title   = $this->view()->renderTemplate($opts['title_pattern'], $form);
+            $label   = $this->view()->renderTemplate($opts['label_pattern'], $form);
+            $value   = $this->view()->renderTemplate($opts['value_pattern'], $form);
+            $subtext = $this->view()->renderTemplate($opts['subtext_pattern'], $form);
 
             $out = [
-                'id'      => $f->signup_form_url,
+                'id'      => $form->signup_form_url,
                 'value'   => $value,
                 'title'   => $title,
                 'label'   => $label,
-                'subtext' => $subtext
+                'subtext' => $subtext,
             ];
 
-            yield $this->parseChoice($f->signup_form_url, $out);
+            yield $this->parseChoice($form->signup_form_url, $out);
         }
     }
 }

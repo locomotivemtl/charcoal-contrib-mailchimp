@@ -2,11 +2,11 @@
 
 namespace Charcoal\Tests;
 
-use PHPUnit\Framework\TestCase as BaseTestCase;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Basic Charcoal Test
  */
-abstract class AbstractTestCase extends BaseTestCase
+abstract class AbstractTestCase extends TestCase
 {
 }

@@ -59,7 +59,7 @@ This will provide everything needed for [charcoal-contrib-mailchimp] to work pro
 }
 ```
 
-Add the api key (Account > Settings > Extra > Api keys) in the config apis:
+Add the API key (Account > Settings > Extra > Api keys) in the config apis:
 
 ```json
 "apis": {
@@ -90,7 +90,7 @@ Set your property as follow.
         }
     }
 ```
-You can customize the displayed label, the displayed title, the value and the subtext pattern. 
+You can customize the displayed label, the displayed title, the value and the subtext pattern.
 It is also possible to add query parameters (see [Doc](https://developer.mailchimp.com/documentation/mailchimp/reference/lists/#%20)) Default as follow:
 ```json
 "mailchimp_options": {
@@ -110,7 +110,7 @@ It is also possible to add query parameters (see [Doc](https://developer.mailchi
         [...]
     }
 ```
-You can customize the displayed label, the displayed title, the value and the subtext pattern. 
+You can customize the displayed label, the displayed title, the value and the subtext pattern.
 Default as follow:
 ```json
 "mailchimp_options": {
@@ -130,12 +130,12 @@ class FooBar
     use MailchimpAwareTrait;
     [...]
 
-    public function setDependencies(Container $container)
+    public function setDependencies(ContainerInterface $container)
     {
         $this->setMailchimpListsMembers($container['mailchimp/lists/members']);
         [...]
     }
-    
+
     public function run()
     {
         $user = [
@@ -146,20 +146,20 @@ class FooBar
                 'LNAME' => 'Doe'
             ]
         ];
-        
+
         // Set list ID
         $listId = 'a4029db2d';
         $this->mailchimpListsMembers()->setListId($listId);
-        
+
         // Add/Create user
         $results = $this->mailchimpListsMembers()->add($user);
-        
+
         // Add or Update user
         $results = $this->mailchimpListsMembers()->addOrUpdate($user);
-        
+
         // Get a user's informations
-        $results = $this->mailchimpListsMembers()->get('email@example.com');        
-        
+        $results = $this->mailchimpListsMembers()->get('email@example.com');
+
         // Delete a user from a list
         $results = $this->mailchimpListsMembers()->remove('email@example.com');
     }
@@ -175,7 +175,7 @@ put and delete methods.
 $this->mailchimp()->get('lists/{list_id}/members');
 
 // Add member to list
-$this->mailchimp()->post('list/{list_id}/members', [ 
+$this->mailchimp()->post('list/{list_id}/members', [
     'email_address' => 'email@example.com',
     'status' => 'pending'
 ]);
