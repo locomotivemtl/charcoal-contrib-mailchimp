@@ -9,7 +9,7 @@ use DI\Container;
 
 class MailchimpServiceProvider
 {
-    public function register(Container $container)
+    public function register(Container $container): void
     {
         /**
          * Mailchimp API client.

@@ -14,6 +14,7 @@ class MailchimpModule extends AbstractModule
 
     public function setup()
     {
+        /** @var \DI\Container */
         $container = $this->app()->getContainer();
 
         $mailchimpServiceProvider = new MailchimpServiceProvider();

@@ -9,6 +9,7 @@ namespace Charcoal\Admin\Property\Input;
  */
 class MailchimpListInput extends MailchimpInput
 {
+    /** @var array<string, mixed> */
     protected ?array $mailchimpOptions = null;
 
     /**
@@ -17,6 +18,8 @@ class MailchimpListInput extends MailchimpInput
      * Defaults to defaultOptions when none given.
      *
      * Merged with default options in setMailchimpOptions.
+     *
+     * @return array<string, mixed>
      */
     protected function mailchimpOptions(): array
     {
@@ -35,6 +38,8 @@ class MailchimpListInput extends MailchimpInput
      *
      * Default API key is set in the `ServiceProvider` that includes
      * Mailchimp and finds its source in the config of the site (apis.mailchimp.key).
+     *
+     * @param array<string, mixed> $options
      */
     public function setMailchimpOptions(array $options = []): self
     {
@@ -45,6 +50,8 @@ class MailchimpListInput extends MailchimpInput
 
     /**
      * Default options for the plugin, such as patterns.
+     *
+     * @return array<string, mixed>
      */
     protected function defaultOptions(): array
     {
@@ -66,7 +73,15 @@ class MailchimpListInput extends MailchimpInput
      * can use any properties from the `Response body parameters` defined in
      * the previous link.
      *
-     * @return iterable
+     * @return iterable<array{
+     *     id:       string,
+     *     value:    string,
+     *     title:    string,
+     *     label:    string,
+     *     subtext:  string,
+     *     icon:     string,
+     *     disabled: bool,
+     * }>
      */
     public function choices()
     {

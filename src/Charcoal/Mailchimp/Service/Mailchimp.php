@@ -79,9 +79,9 @@ class Mailchimp
     /**
      * Send the actual request
      *
-     * @param  string $verb     PUT, PATCH, GET, POST, DELETE.
-     * @param  string $endpoint Endpoint URL such as `lists/{id}/members`.
-     * @param  array  $opts     Arguments to be sent to the endpoint.
+     * @param  string               $verb     PUT, PATCH, GET, POST, DELETE.
+     * @param  string               $endpoint Endpoint URL such as `lists/{id}/members`.
+     * @param  array<string, mixed> $opts     Arguments to be sent to the endpoint.
      * @return object JSON-decoded response body without headers.
      */
     private function sendRequest(string $verb, string $endpoint, array $opts): object
@@ -152,8 +152,8 @@ class Mailchimp
     /**
      * Shorthand to sendRequest('get', $endpoint, $args).
      *
-     * @param  string $endpoint API method.
-     * @param  array  $args     Arguments to send to the endpoint.
+     * @param  string               $endpoint API method.
+     * @param  array<string, mixed> $args     Arguments to send to the endpoint.
      * @return object JSON-decoded response body without headers.
      */
     public function get(string $endpoint, array $args = []): object
@@ -164,8 +164,8 @@ class Mailchimp
     /**
      * Shorthand to sendRequest('post', $endpoint, $args).
      *
-     * @param  string $endpoint API method.
-     * @param  array  $args     Arguments to send to the endpoint.
+     * @param  string               $endpoint API method.
+     * @param  array<string, mixed> $args     Arguments to send to the endpoint.
      * @return object JSON-decoded response body without headers.
      */
     public function post(string $endpoint, array $args = []): object
@@ -176,8 +176,8 @@ class Mailchimp
     /**
      * Shorthand to sendRequest('put', $endpoint, $args).
      *
-     * @param  string $endpoint API method.
-     * @param  array  $args     Arguments to send to the endpoint.
+     * @param  string               $endpoint API method.
+     * @param  array<string, mixed> $args     Arguments to send to the endpoint.
      * @return object JSON-decoded response body without headers.
      */
     public function put(string $endpoint, array $args = []): object
@@ -188,8 +188,8 @@ class Mailchimp
     /**
      * Shorthand to sendRequest('patch', $endpoint, $args).
      *
-     * @param  string $endpoint API method.
-     * @param  array  $args     Arguments to send to the endpoint.
+     * @param  string               $endpoint API method.
+     * @param  array<string, mixed> $args     Arguments to send to the endpoint.
      * @return object JSON-decoded response body without headers.
      */
     public function patch(string $endpoint, array $args = []): object
@@ -200,8 +200,8 @@ class Mailchimp
     /**
      * Shorthand to sendRequest('delete', $endpoint, $args).
      *
-     * @param  string $endpoint API method.
-     * @param  array  $args     Arguments to send to the endpoint.
+     * @param  string               $endpoint API method.
+     * @param  array<string, mixed> $args     Arguments to send to the endpoint.
      * @return object JSON-decoded response body without headers.
      */
     public function delete(string $endpoint, array $args = []): object

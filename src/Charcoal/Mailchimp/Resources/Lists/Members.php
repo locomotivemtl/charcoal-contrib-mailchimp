@@ -16,7 +16,7 @@ class Members extends Lists
 {
     public const API_ENDPOINT = '/members';
 
-    protected function apiEndpoint($userHash = null): string
+    protected function apiEndpoint(?string $userHash = null): string
     {
         if (!$this->listId()) {
             throw new RuntimeException(
@@ -46,8 +46,10 @@ class Members extends Lists
 
     /**
      * Update a user
+     *
+     * @param array<string, mixed> $queryParameters
      */
-    public function update(string $email, array $queryParameters)
+    public function update(string $email, array $queryParameters): object
     {
         $endpoint = $this->apiEndpoint($this->subscriberHash($email));
         $results  = $this->mailchimp()->patch($endpoint, $queryParameters);
@@ -55,7 +57,10 @@ class Members extends Lists
         return $results;
     }
 
-    public function add(array $queryParameters)
+    /**
+     * @param array<string, mixed> $queryParameters
+     */
+    public function add(array $queryParameters): object
     {
         if (empty($queryParameters['email_address'])) {
             throw new \InvalidArgumentException(
@@ -79,8 +84,11 @@ class Members extends Lists
      * Get a member or all members from the list
      *
      * Add filters in queryParameters according to the doc.
+     *
+     * @param array<string, mixed>|string|null $arg
+     * @param array<string, mixed>             $queryParameters
      */
-    public function get(array|string|null $arg = null, array $queryParameters = [])
+    public function get(array|string|null $arg = null, array $queryParameters = []): object
     {
         $endpoint = $this->apiEndpoint();
 
@@ -101,8 +109,10 @@ class Members extends Lists
 
     /**
      * Add or update a user
+     *
+     * @param array<string, mixed> $queryParameters
      */
-    public function addOrUpdate(array $queryParameters)
+    public function addOrUpdate(array $queryParameters): object
     {
         if (empty($queryParameters['email_address'])) {
             throw new RuntimeException(
@@ -121,7 +131,7 @@ class Members extends Lists
     /**
      * Remove a user from a list
      */
-    public function remove(string $email)
+    public function remove(string $email): object
     {
         $subscriberHash = $this->subscriberHash($email);
         $endpoint = $this->apiEndpoint($subscriberHash);
@@ -131,7 +141,7 @@ class Members extends Lists
     /**
      * Delete permanently a user
      */
-    public function deletePermanent(string $email)
+    public function deletePermanent(string $email): object
     {
         $endpoint = $this->apiEndpoint(
             $this->subscriberHash($email)
