@@ -1,7 +1,7 @@
 {
     "type": "library",
     "name": "locomotivemtl/charcoal-contrib-mailchimp",
-    "description": "Charcoal service provider for Mailchimp implementation.",
+    "description": "Charcoal service provider for the Mailchimp Marketing API.",
     "keywords": [
         "charcoal"
     ],

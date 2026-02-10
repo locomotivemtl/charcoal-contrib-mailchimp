@@ -1,33 +1,10 @@
-Charcoal Mailchimp
-===============
+# Charcoal Mailchimp
 
-[![License][badge-license]][charcoal-contrib-mailchimp]
-[![Latest Stable Version][badge-version]][charcoal-contrib-mailchimp]
-[![Code Quality][badge-scrutinizer]][dev-scrutinizer]
-[![Coverage Status][badge-coveralls]][dev-coveralls]
-[![Build Status][badge-travis]][dev-travis]
+[![License][badge-license]](LICENSE)
+[![Latest stable version][badge-version]](tags)
+[![Supported PHP version][badge-php]](composer.json)
 
-A [Charcoal][charcoal-app] service provider mailchimp implementation.
-
-
-
-## Table of Contents
-
--   [Installation](#installation)
-    -   [Dependencies](#dependencies)
--   [Service Provider](#service-provider)
-    -   [Parameters](#parameters)
-    -   [Services](#services)
--   [Configuration](#configuration)
--   [Usage](#usage)
--   [Development](#development)
-    -  [API Documentation](#api-documentation)
-    -  [Development Dependencies](#development-dependencies)
-    -  [Coding Style](#coding-style)
--   [Credits](#credits)
--   [License](#license)
-
-
+A [Charcoal][charcoal-pkg] service provider for the [Mailchimp Marketing API](https://mailchimp.com/developer/marketing/api/).
 
 ## Installation
 
@@ -37,19 +14,17 @@ The preferred (and only supported) method is with Composer:
 $ composer require locomotivemtl/charcoal-contrib-mailchimp
 ```
 
-
-
 ### Dependencies
 
 #### Required
 
--   [**PHP 5.6+**](https://php.net): _PHP 7_ is recommended.
-
+* [PHP](https://php.net) 8.1 or later
 
 ## Configuration
 
-Include the mailchimp module in the projects's config file.
-This will provide everything needed for [charcoal-contrib-mailchimp] to work properly.
+Include the Mailchimp module in the projects's configuration file.
+
+This will merge the module's configuration file and register container services:
 
 ```json
 {
@@ -59,7 +34,7 @@ This will provide everything needed for [charcoal-contrib-mailchimp] to work pro
 }
 ```
 
-Add the API key (Account > Settings > Extra > Api keys) in the config apis:
+Add the API key (Account > Settings > Extra > API keys) in the project's configuration files:
 
 ```json
 "apis": {
@@ -69,50 +44,43 @@ Add the API key (Account > Settings > Extra > Api keys) in the config apis:
 }
 ```
 
-
 ## Usage
 
-[charcoal-contrib-mailchimp] comes with a set of tools to help setup a newsletter subscription.
+The Mailchimp module comes with a set of tools to help setup a newsletter subscription.
 
 ### Properties
 
-There are 2 different property types you can use to either select an audience or a signup form for a
-given audience.
+The Mailchimp module provides two different input property types to select an audience or a sign-up form for a given audience.
 
 #### Mailchimp List
-Set your property as follow.
-```json
-    "type": "string",
-    "input_type": "charcoal/admin/property/input/mailchimp-list",
-    "mailchimp_options": {
-        "query_parameters": {
-            "count": 20
-        }
-    }
-```
-You can customize the displayed label, the displayed title, the value and the subtext pattern.
-It is also possible to add query parameters (see [Doc](https://developer.mailchimp.com/documentation/mailchimp/reference/lists/#%20)) Default as follow:
-```json
+
+The input property for selecting a List/Audience:
+
+```jsonc
+"type": "string",
+"input_type": "charcoal/admin/property/input/mailchimp-list",
+// Default options
 "mailchimp_options": {
     "title_pattern": "{{name}}",
     "value_pattern": "{{id}}",
     "label_pattern": "{{name}}",
     "subtext_pattern": "Web ID: {{id}}",
-    "query_parameters": []
+    "query_parameters": {}
 }
 ```
 
-#### Mailchimp Signup Form
-```json
-    "type": "string",
-    "input_type": "charcoal/admin/property/input/mailchimp-form",
-    "mailchimp_options": {
-        [...]
-    }
-```
-You can customize the displayed label, the displayed title, the value and the subtext pattern.
-Default as follow:
-```json
+The `mailchimp_options` setting allows you to customize how the Lists are rendered as options.
+
+The `query_parameters` setting allows you to customize which Lists to retrieve from the API. See the [Lists API reference for available parameters](https://developer.mailchimp.com/documentation/mailchimp/reference/lists/#%20)).
+
+#### Mailchimp Sign-up Form
+
+The input property for selecting a Sign-up Form for a given List:
+
+```jsonc
+"type": "string",
+"input_type": "charcoal/admin/property/input/mailchimp-form",
+// Default options
 "mailchimp_options": {
     "title_pattern": "{{header.text}}",
     "value_pattern": "{{signup_form_url}}",
@@ -121,34 +89,33 @@ Default as follow:
 }
 ```
 
+The `mailchimp_options` setting allows you to customize how the Sign-up Forms are rendered as options.
+
 ### User subscription
 
 ```php
-
-class FooBar
+class Foobar
 {
     use MailchimpAwareTrait;
-    [...]
 
-    public function setDependencies(ContainerInterface $container)
+    public function setDependencies(\Psr\Container\ContainerInterface $container): void
     {
         $this->setMailchimpListsMembers($container['mailchimp/lists/members']);
-        [...]
     }
 
-    public function run()
+    public function run(): void
     {
         $user = [
             'email_address' => 'email@example.com',
-            'status' => 'pending',
-            'merge_fields' => [
+            'status'        => 'pending',
+            'merge_fields'  => [
                 'FNAME' => 'John',
-                'LNAME' => 'Doe'
-            ]
+                'LNAME' => 'Doe',
+            ],
         ];
 
         // Set list ID
-        $listId = 'a4029db2d';
+        $listId = 'XYZ';
         $this->mailchimpListsMembers()->setListId($listId);
 
         // Add/Create user
@@ -164,66 +131,44 @@ class FooBar
         $results = $this->mailchimpListsMembers()->remove('email@example.com');
     }
 }
-
 ```
 
-The mailchimp service is standalone and can be used directly if you know the endpoints by using the post, patch, get,
-put and delete methods.
+The Mailchimp API client can be used directly if you are familiar with that service's API's endpoints and methods.
 
 ```php
+$mailchimp = new \Charcoal\Mailchimp\Service\Mailchimp();
+$mailchimp->setApiKey('AAA-XYZ');
+
 // Get lists members
-$this->mailchimp()->get('lists/{list_id}/members');
+$mailchimp->get('lists/{list_id}/members');
 
 // Add member to list
-$this->mailchimp()->post('list/{list_id}/members', [
+$mailchimp->post('list/{list_id}/members', [
     'email_address' => 'email@example.com',
-    'status' => 'pending'
+    'status'        => 'pending',
 ]);
 ```
 
-## Coding Style
+## Contributing
 
-The charcoal-contrib-mailchimp module follows the Charcoal coding-style:
+Everyone interacting with Charcoal is expected to follow the [code of conduct](https://github.com/charcoalphp/.github/blob/main/CODE_OF_CONDUCT.md).
 
--   [_PSR-1_][psr-1]
--   [_PSR-2_][psr-2]
--   [_PSR-4_][psr-4], autoloading is therefore provided by _Composer_.
--   [_phpDocumentor_](http://phpdoc.org/) comments.
--   [phpcs.xml.dist](phpcs.xml.dist) and [.editorconfig](.editorconfig) for coding standards.
+Please see our [contribution guide](https://github.com/charcoalphp/.github/blob/main/CONTRIBUTING.md) on how to contribute to Charcoal.
 
-> Coding style validation / enforcement can be performed with `composer phpcs`. An auto-fixer is also available with `composer phpcbf`.
+If you are tying to report a possible security vulnerability in Charcoal, please see our [security policy](https://github.com/charcoalphp/charcoal/security/policy) for more information.
 
+## Authors
 
-
-## Credits
-
--   [Locomotive](https://locomotive.ca/)
-
-
+* [Locomotive](https://locomotive.ca/) 🚂
 
 ## License
 
-Charcoal is licensed under the MIT license. See [LICENSE](LICENSE) for details.
+The Charcoal Mailchimp module is licensed under the MIT license. See [LICENSE](LICENSE) for details.
 
+[charcoal-contrib-mailchimp]: https://packagist.org/packages/locomotivemtl/charcoal-contrib-mailchimp
+[charcoal-org]:               https://github.com/charcoalphp
+[charcoal-pkg]:               https://packagist.org/packages/charcoal/charcoal
 
-
-[charcoal-contrib-mailchimp]:  https://packagist.org/packages/locomotivemtl/charcoal-contrib-mailchimp
-[charcoal-app]:             https://packagist.org/packages/locomotivemtl/charcoal-app
-
-[dev-scrutinizer]:    https://scrutinizer-ci.com/g/locomotivemtl/charcoal-contrib-mailchimp/
-[dev-coveralls]:      https://coveralls.io/r/locomotivemtl/charcoal-contrib-mailchimp
-[dev-travis]:         https://travis-ci.org/locomotivemtl/charcoal-contrib-mailchimp
-
-[badge-license]:      https://img.shields.io/packagist/l/locomotivemtl/charcoal-contrib-mailchimp.svg?style=flat-square
-[badge-version]:      https://img.shields.io/packagist/v/locomotivemtl/charcoal-contrib-mailchimp.svg?style=flat-square
-[badge-scrutinizer]:  https://img.shields.io/scrutinizer/g/locomotivemtl/charcoal-contrib-mailchimp.svg?style=flat-square
-[badge-coveralls]:    https://img.shields.io/coveralls/locomotivemtl/charcoal-contrib-mailchimp.svg?style=flat-square
-[badge-travis]:       https://img.shields.io/travis/locomotivemtl/charcoal-contrib-mailchimp.svg?style=flat-square
-
-[psr-1]:  https://www.php-fig.org/psr/psr-1/
-[psr-2]:  https://www.php-fig.org/psr/psr-2/
-[psr-3]:  https://www.php-fig.org/psr/psr-3/
-[psr-4]:  https://www.php-fig.org/psr/psr-4/
-[psr-6]:  https://www.php-fig.org/psr/psr-6/
-[psr-7]:  https://www.php-fig.org/psr/psr-7/
-[psr-11]: https://www.php-fig.org/psr/psr-11/
+[badge-license]: https://img.shields.io/packagist/l/locomotivemtl/charcoal-contrib-mailchimp.svg?style=flat-square
+[badge-php]:     https://img.shields.io/packagist/dependency-v/locomotivemtl/charcoal-contrib-mailchimp/php.svg?style=flat-square&logo=php
+[badge-version]: https://img.shields.io/packagist/v/locomotivemtl/charcoal-contrib-mailchimp.svg?style=flat-square&logo=packagist
