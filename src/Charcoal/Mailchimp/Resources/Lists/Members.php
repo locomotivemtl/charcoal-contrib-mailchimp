@@ -3,47 +3,41 @@
 namespace Charcoal\Mailchimp\Resources\Lists;
 
 use Charcoal\Mailchimp\Resources\Lists;
+use RuntimeException;
 
 /**
- * Class Members
+ * Mailchimp Members API facade
+ *
  * Create, Get, Edit or Delete a member
  *
- * @see https://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/
- * @package Charcoal\Mailchimp\Resources\Lists
+ * {@link https://developer.mailchimp.com/documentation/mailchimp/reference/lists/members/}
  */
 class Members extends Lists
 {
-    const API_ENDPOINT = '/members';
+    public const API_ENDPOINT = '/members';
 
-    /**
-     * @return string
-     */
-    protected function apiEndpoint($userHash = null)
+    protected function apiEndpoint(?string $userHash = null): string
     {
         if (!$this->listId()) {
-            throw new \RuntimeException(
+            throw new RuntimeException(
                 'No list ID defined.'
             );
         }
 
-        $endpoint = parent::apiEndpoint();
+        $endpoint  = parent::apiEndpoint();
         $endpoint .= self::API_ENDPOINT;
 
         if ($userHash) {
-            $endpoint = strtr($endpoint.'/{user_hash}', [
-                '{user_hash}' => $userHash
-            ]);
+            $endpoint = strtr($endpoint . '/{user_hash}', ['{user_hash}' => $userHash]);
         }
 
         return $endpoint;
     }
 
     /**
-     * Get subscriber hash as requested in the mailchimp api documentation
-     *
-     * @param $email
+     * Get subscriber hash as requested in the Mailchimp API documentation
      */
-    protected function subscriberHash($email)
+    protected function subscriberHash(string $email): string
     {
         return md5(strtolower($email));
     }
@@ -51,62 +45,61 @@ class Members extends Lists
     /**
      * Update a user
      *
-     * @param array $queryParameters
-     * @return mixed
+     * @param array<string, mixed> $queryParameters
      */
-    public function update($email, array $queryParameters)
+    public function update(string $email, array $queryParameters): object
     {
         $endpoint = $this->apiEndpoint($this->subscriberHash($email));
-        $results = $this->mailchimp()->patch($endpoint, $queryParameters);
+        $results  = $this->mailchimp()->patch($endpoint, $queryParameters);
+
         return $results;
     }
 
     /**
-     *
-     *
-     * @param array $queryParameters
-     * @return mixed
+     * @param array<string, mixed> $queryParameters
      */
-    public function add(array $queryParameters)
+    public function add(array $queryParameters): object
     {
-        if (!isset($queryParameters['email_address'])) {
+        if (empty($queryParameters['email_address'])) {
             throw new \InvalidArgumentException(
                 'Missing parameter \'email_address\' for user creation'
             );
         }
 
-        if (!isset($queryParameters['status'])) {
+        if (empty($queryParameters['status'])) {
             throw new \InvalidArgumentException(
                 'Missing parameter \'status\' for user creation'
             );
         }
 
         $endpoint = $this->apiEndpoint();
-        $results = $this->mailchimp()->post($endpoint, $queryParameters);
+        $results  = $this->mailchimp()->post($endpoint, $queryParameters);
 
         return $results;
     }
 
     /**
      * Get a member or all members from the list
+     *
      * Add filters in queryParameters according to the doc.
      *
-     * @param mixed $arg
-     * @param array $queryParameters
-     * @return mixed
+     * @param array<string, mixed>|string|null $arg
+     * @param array<string, mixed>             $queryParameters
      */
-    public function get($arg = null, $queryParameters = [])
+    public function get(array|string|null $arg = null, array $queryParameters = []): object
     {
         $endpoint = $this->apiEndpoint();
 
-        // Is an email
         if (is_string($arg)) {
-            $endpoint = $this->apiEndpoint($this->subscriberHash($arg));
+            $endpoint = $this->apiEndpoint(
+                $this->subscriberHash($arg)
+            );
         }
 
         if (is_array($arg)) {
             $queryParameters = $arg;
         }
+
         $results = $this->mailchimp()->get($endpoint, $queryParameters);
 
         return $results;
@@ -115,29 +108,28 @@ class Members extends Lists
     /**
      * Add or update a user
      *
-     * @param array $queryParameters
-     * @return mixed
+     * @param array<string, mixed> $queryParameters
      */
-    public function addOrUpdate(array $queryParameters)
+    public function addOrUpdate(array $queryParameters): object
     {
-        if (!isset($queryParameters['email_address'])) {
-            throw new \RuntimeException(
+        if (empty($queryParameters['email_address'])) {
+            throw new RuntimeException(
                 'No user ID (subscriber_hash) nor email defined.'
             );
         }
 
-        $endpoint = $this->apiEndpoint($this->subscriberHash($queryParameters['email_address']));
+        $endpoint = $this->apiEndpoint(
+            $this->subscriberHash($queryParameters['email_address'])
+        );
         $results = $this->mailchimp()->put($endpoint, $queryParameters);
+
         return $results;
     }
 
     /**
      * Remove a user from a list
-     *
-     * @param $email
-     * @return mixed
      */
-    public function remove($email)
+    public function remove(string $email): object
     {
         $subscriberHash = $this->subscriberHash($email);
         $endpoint = $this->apiEndpoint($subscriberHash);
@@ -146,14 +138,13 @@ class Members extends Lists
 
     /**
      * Delete permanently a user
-     *
-     * @param $email
-     * @return mixed
      */
-    public function deletePermanent($email)
+    public function deletePermanent(string $email): object
     {
-        $subscriberHash = $this->subscriberHash($email);
-        $endpoint = $this->apiEndpoint($subscriberHash).'/actions/delete-permanent';
+        $endpoint = $this->apiEndpoint(
+            $this->subscriberHash($email)
+        ) . '/actions/delete-permanent';
+
         return $this->mailchimp()->delete($endpoint);
     }
 }

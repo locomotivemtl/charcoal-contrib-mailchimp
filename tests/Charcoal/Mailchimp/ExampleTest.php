@@ -1,22 +1,15 @@
 <?php
 
-namespace Charcoal\Tests\FooBar;
+namespace Charcoal\Tests\Mailchimp;
 
-// From 'charcoal-contrib-foobar'
 use Charcoal\Tests\AbstractTestCase;
 
-/**
- * @coversDefaultClass Charcoal\FooBar\ExampleInterface
- */
 class ExampleTest extends AbstractTestCase
 {
-    /**
-     * A basic test example.
-     *
-     * @return void
-     */
-    public function testBasicTest()
+    public function testBasicTest(): void
     {
-        $this->assertTrue(true);
+        $this->markTestIncomplete(
+            'No tests have been implemented yet.'
+        );
     }
 }

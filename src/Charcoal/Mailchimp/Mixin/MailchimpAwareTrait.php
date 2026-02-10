@@ -3,75 +3,45 @@
 namespace Charcoal\Mailchimp\Mixin;
 
 use Charcoal\Mailchimp\Resources\Lists;
+use Charcoal\Mailchimp\Resources\Lists\Members;
 use Charcoal\Mailchimp\Service\Mailchimp;
 
 trait MailchimpAwareTrait
 {
+    protected ?Mailchimp $mailchimp = null;
 
-    /**
-     * @var Mailchimp
-     */
-    protected $mailchimp;
+    protected ?Lists $mailchimpLists = null;
 
-    /**
-     * @var Lists
-     */
-    protected $mailchimpLists;
+    protected ?Members $mailchimpListsMembers = null;
 
-    /**
-     * @var Lists\Members
-     */
-    protected $mailchimpListsMembers;
-
-    /**
-     * @return mixed
-     */
-    public function mailchimp()
+    public function mailchimp(): Mailchimp
     {
         return $this->mailchimp;
     }
 
-    /**
-     * @param Mailchimp $mailchimp
-     * @return MailchimpAwareTrait
-     */
-    public function setMailchimp(Mailchimp $mailchimp)
+    public function setMailchimp(Mailchimp $mailchimp): self
     {
         $this->mailchimp = $mailchimp;
         return $this;
     }
 
-    /**
-     * @return Lists
-     */
-    public function mailchimpLists()
+    public function mailchimpLists(): Lists
     {
         return $this->mailchimpLists;
     }
 
-    /**
-     * @param Lists $mailchimpLists
-     * @return MailchimpAwareTrait
-     */
-    public function setMailchimpLists($mailchimpLists)
+    public function setMailchimpLists(Lists $mailchimpLists): self
     {
         $this->mailchimpLists = $mailchimpLists;
         return $this;
     }
 
-    /**
-     * @return Lists\Members
-     */
-    public function mailchimpListsMembers()
+    public function mailchimpListsMembers(): Members
     {
         return $this->mailchimpListsMembers;
     }
 
-    /**
-     * @param Lists\Members $mailchimpListsMembers
-     * @return MailchimpAwareTrait
-     */
-    public function setMailchimpListsMembers($mailchimpListsMembers)
+    public function setMailchimpListsMembers(Members $mailchimpListsMembers): self
     {
         $this->mailchimpListsMembers = $mailchimpListsMembers;
         return $this;

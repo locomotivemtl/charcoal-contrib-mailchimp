@@ -1,11 +1,10 @@
 {
     "type": "library",
     "name": "locomotivemtl/charcoal-contrib-mailchimp",
-    "description": "Charcoal service provider for mailchimp implementation.",
+    "description": "Charcoal service provider for the Mailchimp Marketing API.",
     "keywords": [
         "charcoal"
     ],
-    "homepage": "https://locomotivemtl.github.io/charcoal-contrib-mailchimp/",
     "license": "MIT",
     "authors": [
         {
@@ -13,22 +12,25 @@
             "homepage": "https://locomotive.ca"
         }
     ],
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "extra": {
         "branch-alias": {
-            "dev-master": "0.2.x-dev"
+            "dev-main": "1.x-dev"
         }
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
-        "php": ">=5.6.0 || >=7.0",
-        "ext-curl": "*", "ext-json": "*",
-        "locomotivemtl/charcoal-admin": ">= 0.17"
+        "php": "^8.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "charcoal/admin": "^6.0",
+        "php-di/php-di": "^7.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.7 || ^6.5",
-        "squizlabs/php_codesniffer": "^3.0",
-        "php-coveralls/php-coveralls": "^2.0"
+        "phpstan/phpstan": "^2.1",
+        "seld/jsonlint": "^1.11",
+        "squizlabs/php_codesniffer": "^4.0",
+        "symfony/phpunit-bridge": "^8.0"
     },
     "autoload": {
         "psr-4": {
@@ -41,17 +43,32 @@
         }
     },
     "scripts": {
+        "fix:phpcbf": "phpcbf -ps --colors",
+        "lint": [
+            "@lint:json",
+            "@lint:php",
+            "@lint:phpcs",
+            "@lint:phpstan"
+        ],
+        "lint:json": "find {config,metadata} -type f -iname '*.json' -print0 2> /dev/null | xargs -0 jsonlint -q",
+        "lint:php": "find {src,tests} -type f -name '*.php' -print0 2> /dev/null | xargs -0 -n1 -P8 $PHP_BINARY -l | grep -v '^No syntax errors detected'; test $? -eq 1",
+        "lint:phpcs": "phpcs -ps --colors",
+        "lint:phpstan": "phpstan analyse",
         "test": [
-            "@tests"
+            "@test:phpunit"
         ],
-        "tests": [
-            "@phplint",
-            "@phpcs",
-            "@phpunit"
-        ],
-        "phplint": "find {src,tests} -name '*.php' -print0 | xargs -0 -n1 -P8 php -l | grep -v '^No syntax errors detected'; test $? -eq 1",
-        "phpcs": "php vendor/bin/phpcs -ps --colors src/ tests/",
-        "phpcbf": "php vendor/bin/phpcbf -ps --colors src/ tests/",
-        "phpunit": "php vendor/bin/phpunit --coverage-text"
+        "test:phpunit": "simple-phpunit"
+    },
+    "scripts-descriptions": {
+        "fix:phpcbf": "Fix syntax violations with PHPCS",
+        "lint": "Run all linting tools",
+        "lint:php": "Run syntax check with PHP",
+        "lint:phpcs": "Run syntax check with PHPCS",
+        "lint:phpstan": "Run static code analysis with PHPStan",
+        "test": "Run all testing tools",
+        "test:phpunit": "Run all tests with PHPUnit"
+    },
+    "config": {
+        "sort-packages": true
     }
 }

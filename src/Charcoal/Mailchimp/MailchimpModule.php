@@ -6,23 +6,19 @@ use Charcoal\App\Module\AbstractModule;
 use Charcoal\Mailchimp\ServiceProvider\MailchimpServiceProvider;
 
 /**
- * Mailchimp Module
+ * Charcoal Mailchimp Module
  */
 class MailchimpModule extends AbstractModule
 {
-    const APP_CONFIG = 'vendor/locomotivemtl/charcoal-contrib-mailchimp/config/config.json';
+    public const APP_CONFIG = 'vendor/locomotivemtl/charcoal-contrib-mailchimp/config/config.json';
 
-    /**
-     * Setup the module's dependencies.
-     *
-     * @return AbstractModule
-     */
     public function setup()
     {
+        /** @var \DI\Container */
         $container = $this->app()->getContainer();
 
         $mailchimpServiceProvider = new MailchimpServiceProvider();
-        $container->register($mailchimpServiceProvider);
+        $mailchimpServiceProvider->register($container);
 
         return $this;
     }

@@ -2,82 +2,55 @@
 
 namespace Charcoal\Mailchimp\Service;
 
-use Exception;
-use RuntimeException;
-use stdClass;
+use InvalidArgumentException;
 
 /**
- * Mailchimp helper
- * Connects to api v3 of mailchimp.
+ * Mailchimp API v3 client
  */
 class Mailchimp
 {
-    /**
-     * @var integer
-     */
-    private $timeout = 10;
+    private ?string $apiKey = null;
 
-    /**
-     * @var boolean
-     */
-    private $verifySsl = false;
+    private int $timeout = 10;
 
-    /**
-     * Api key used to connect to the mail chimp api.
-     *
-     * @var string $apiKey
-     */
-    protected $apiKey;
+    private bool $verifySsl = false;
 
-    /**
-     * @param boolean $bool Verify ssl state.
-     * @return self
-     */
-    public function setVerifySsl($bool)
+    public function setVerifySsl(bool $verify): self
     {
-        $this->verifySsl = $bool;
+        $this->verifySsl = $verify;
 
         return $this;
     }
 
-    /**
-     * @return boolean Verify ssl.
-     */
-    public function verifySsl()
+    public function verifySsl(): bool
     {
         return $this->verifySsl;
     }
 
-    /**
-     * @param integer $timeout Timeout.
-     * @return self
-     */
-    public function setTimeout($timeout)
+    public function setTimeout(int $timeout): self
     {
         $this->timeout = $timeout;
 
         return $this;
     }
 
-    /**
-     * @return integer Timeout.
-     */
-    public function timeout()
+    public function timeout(): int
     {
         return $this->timeout;
     }
 
     /**
-     * @param string $key Api key.
-     * @return self
-     * @throws RuntimeException When the api key is invalid.
+     * @throws InvalidArgumentException When the API key is invalid.
      */
-    public function setApiKey($key)
+    public function setApiKey(string $key): self
     {
         $split = explode('-', $key);
 
-        if (!isset($split[1])) {
-            throw new RuntimeException(sprintf('Invalid mailchimp api key: %s', $key));
+        if (empty($split[1])) {
+            throw new InvalidArgumentException(sprintf(
+                'Invalid Mailchimp API key: %s',
+                $key
+            ));
         }
 
         $this->apiKey = $key;
@@ -85,45 +58,36 @@ class Mailchimp
         return $this;
     }
 
-    /**
-     * @return string Api key.
-     * @throws Exception When no api key is defined.
-     */
-    public function apiKey()
+    public function apiKey(): string
     {
-        if (!$this->apiKey) {
-            throw new Exception('No api key defined.');
-        }
-
         return $this->apiKey;
     }
 
     /**
-     * Api endpoint from the api key.
-     *
-     * @return string Route to api.
+     * API endpoint from the API key.
      */
-    private function apiEndpoint()
+    private function apiEndpoint(): string
     {
         $key   = $this->apiKey();
         $split = explode('-', $key);
-        $dc    = $split[1];
 
-        return strtr('https://<dc>.api.mailchimp.com/3.0/', ['<dc>' => $dc]);
+        return strtr('https://<dc>.api.mailchimp.com/3.0/', [
+            '<dc>' => $split[1],
+        ]);
     }
 
     /**
      * Send the actual request
      *
-     * @param string $verb   Put,Patch,Get,Post,Delete.
-     * @param string $method Method URL such as lists/{id}/members.
-     * @param array  $opts   Arguments to be sent to the endpoint.
-     * @return stdClass      Json_decode response without headers.
+     * @param  string               $verb     PUT, PATCH, GET, POST, DELETE.
+     * @param  string               $endpoint Endpoint URL such as `lists/{id}/members`.
+     * @param  array<string, mixed> $opts     Arguments to be sent to the endpoint.
+     * @return object JSON-decoded response body without headers.
      */
-    private function sendRequest($verb, $method, array $opts)
+    private function sendRequest(string $verb, string $endpoint, array $opts): object
     {
         $timeout = $this->timeout();
-        $url     = $this->apiEndpoint() . $method;
+        $url     = $this->apiEndpoint() . $endpoint;
         $ssl     = $this->verifySsl();
         $key     = $this->apiKey();
 
@@ -134,7 +98,7 @@ class Mailchimp
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Accept: application/vnd.api+json',
             'Content-Type: application/vnd.api+json',
-            strtr('Authorization: apikey %key', ['%key' => $key])
+            strtr('Authorization: apikey %key', ['%key' => $key]),
         ]);
 
         // Remove header from response
@@ -145,8 +109,9 @@ class Mailchimp
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $ssl);
         curl_setopt($ch, CURLOPT_ENCODING, '');
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+        curl_setopt($ch, CURLOPT_FORBID_REUSE, true);
 
-        // Encoded for curl.
+        // Encoded for cURL.
         $encoded = json_encode($opts);
 
         switch ($verb) {
@@ -181,68 +146,66 @@ class Mailchimp
 
         $response = curl_exec($ch);
 
-        curl_close($ch);
-
         return json_decode($response);
     }
 
     /**
-     * Shorthand to sendRequest('get', $method, $args).
+     * Shorthand to sendRequest('get', $endpoint, $args).
      *
-     * @param string $method Api method.
-     * @param array  $args   Arguments to send to the endpoint.
-     * @return stdClass      Json decoded response without headers.
+     * @param  string               $endpoint API method.
+     * @param  array<string, mixed> $args     Arguments to send to the endpoint.
+     * @return object JSON-decoded response body without headers.
      */
-    public function get($method, array $args = [])
+    public function get(string $endpoint, array $args = []): object
     {
-        return $this->sendRequest('get', $method, $args);
+        return $this->sendRequest('get', $endpoint, $args);
     }
 
     /**
-     * Shorthand to sendRequest('post', $method, $args).
+     * Shorthand to sendRequest('post', $endpoint, $args).
      *
-     * @param string $method Api method.
-     * @param array  $args   Arguments to send to the endpoint.
-     * @return stdClass       Json decoded response without headers.
+     * @param  string               $endpoint API method.
+     * @param  array<string, mixed> $args     Arguments to send to the endpoint.
+     * @return object JSON-decoded response body without headers.
      */
-    public function post($method, array $args = [])
+    public function post(string $endpoint, array $args = []): object
     {
-        return $this->sendRequest('post', $method, $args);
+        return $this->sendRequest('post', $endpoint, $args);
     }
 
     /**
-     * Shorthand to sendRequest('put', $method, $args).
+     * Shorthand to sendRequest('put', $endpoint, $args).
      *
-     * @param string $method Api method.
-     * @param array  $args   Arguments to send to the endpoint.
-     * @return stdClass       Json decoded response without headers.
+     * @param  string               $endpoint API method.
+     * @param  array<string, mixed> $args     Arguments to send to the endpoint.
+     * @return object JSON-decoded response body without headers.
      */
-    public function put($method, array $args = [])
+    public function put(string $endpoint, array $args = []): object
     {
-        return $this->sendRequest('put', $method, $args);
+        return $this->sendRequest('put', $endpoint, $args);
     }
 
     /**
-     * Shorthand to sendRequest('patch', $method, $args).
+     * Shorthand to sendRequest('patch', $endpoint, $args).
      *
-     * @param string $method Api method.
-     * @param array  $args   Arguments to send to the endpoint.
-     * @return stdClass       Json decoded response without headers.
+     * @param  string               $endpoint API method.
+     * @param  array<string, mixed> $args     Arguments to send to the endpoint.
+     * @return object JSON-decoded response body without headers.
      */
-    public function patch($method, array $args = [])
+    public function patch(string $endpoint, array $args = []): object
     {
-        return $this->sendRequest('patch', $method, $args);
+        return $this->sendRequest('patch', $endpoint, $args);
     }
 
     /**
-     * Shorthand to sendRequest('delete', $method, $args).
+     * Shorthand to sendRequest('delete', $endpoint, $args).
      *
-     * @param string $method Api method.
-     * @param array  $args   Arguments to send to the endpoint.
-     * @return stdClass       Json decoded response without headers.
+     * @param  string               $endpoint API method.
+     * @param  array<string, mixed> $args     Arguments to send to the endpoint.
+     * @return object JSON-decoded response body without headers.
      */
-    public function delete($method, array $args = [])
+    public function delete(string $endpoint, array $args = []): object
     {
-        return $this->sendRequest('delete', $method, $args);
+        return $this->sendRequest('delete', $endpoint, $args);
     }
 }

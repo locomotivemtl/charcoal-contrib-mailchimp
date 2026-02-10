@@ -3,60 +3,42 @@
 namespace Charcoal\Mailchimp\ServiceProvider;
 
 use Charcoal\Mailchimp\Resources\Lists;
+use Charcoal\Mailchimp\Resources\Lists\Members;
 use Charcoal\Mailchimp\Service\Mailchimp;
-use Pimple\Container;
-use Pimple\ServiceProviderInterface;
+use DI\Container;
 
-/**
- * Mailchimp Service Provider
- */
-class MailchimpServiceProvider implements ServiceProviderInterface
+class MailchimpServiceProvider
 {
-    /**
-     * @param  Container $container Pimple DI Container.
-     * @return void
-     */
-    public function register(Container $container)
+    public function register(Container $container): void
     {
         /**
-         * Helps dealing with the mailchimp api.
-         *
-         * @param  Container $container Pimple DI Container.
-         * @return Mailchimp  Mailchimp object.
+         * Mailchimp API client.
          */
-        $container['mailchimp'] = function (Container $container) {
-            $cfg       = $container['config'];
-            $key       = $cfg->get('apis.mailchimp.key');
+        $container->set('mailchimp', function (Container $container) {
             $mailchimp = new Mailchimp();
-            $mailchimp->setApiKey($key);
+            $mailchimp->setApiKey(
+                $container->get('config')->get('apis.mailchimp.key')
+            );
 
             return $mailchimp;
-        };
+        });
 
         /**
-         * Mailchimp List facade
-         *
-         * @param Container $container
-         * @return Lists
+         * Mailchimp Lists API facade
          */
-        $container['mailchimp/lists'] = function (Container $container) {
-            return new Lists(
-                ['mailchimp' => $container['mailchimp']]
-            );
-        };
+        $container->set('mailchimp/lists', function (Container $container) {
+            return new Lists([
+                'mailchimp' => $container->get('mailchimp'),
+            ]);
+        });
 
         /**
-         * Mailchimp Members facade
-         *
-         * @param Container $container
-         * @return Lists\Members
+         * Mailchimp Members API facade
          */
-        $container['mailchimp/lists/members'] = function (Container $container) {
-            return new Lists\Members(
-                ['mailchimp' => $container['mailchimp']]
-            );
-        };
-
-
+        $container->set('mailchimp/lists/members', function (Container $container) {
+            return new Members([
+                'mailchimp' => $container->get('mailchimp'),
+            ]);
+        });
     }
 }

@@ -1,23 +1,5 @@
-# Package Managers
-
-composer.phar
-composer.lock
-package-lock.json
-yarn.lock
-/vendor/
-/node_modules/
-
-# Logging
-
 *.log
-/logs/
-
-# Caching
-
-/cache/
-
-# Codebase
-
-/build/docs/
-/build/logs/
-/build/report/
+.phpunit.result.cache
+/vendor/
+composer.lock
+composer.phar

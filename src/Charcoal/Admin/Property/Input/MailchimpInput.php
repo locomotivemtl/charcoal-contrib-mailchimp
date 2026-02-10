@@ -2,53 +2,31 @@
 
 namespace Charcoal\Admin\Property\Input;
 
-use Charcoal\Mailchimp\Service\Mailchimp;
-use Pimple\Container;
-
 use Charcoal\Admin\Property\Input\SelectInput;
+use Charcoal\Mailchimp\Service\Mailchimp;
+use Psr\Container\ContainerInterface;
 
 /**
- * Mailchimp Input
+ * Mailchimp property input
  */
 class MailchimpInput extends SelectInput
 {
-    /**
-     * Mailchimp helper
-     * @var Mailchimp
-     */
-    private $mailchimp;
+    private ?Mailchimp $mailchimp = null;
 
-    /**
-     * Inject dependencies from a DI Container.
-     *
-     * @param Container $container A dependencies container instance.
-     * @return void
-     */
-    public function setDependencies(Container $container)
+    public function setDependencies(ContainerInterface $container): void
     {
         parent::setDependencies($container);
+
         $this->mailchimp = $container['mailchimp'];
     }
 
-    /**
-     * Set mailchimp api service.
-     * Simple service that helps dealing easily with the mailchimp api.
-     *
-     * @param Mailchimp $mailchimp Service for mailchimp.
-     * @return self
-     */
-    protected function setMailchimp(Mailchimp $mailchimp)
+    protected function setMailchimp(Mailchimp $mailchimp): self
     {
         $this->mailchimp = $mailchimp;
         return $this;
     }
 
-    /**
-     * Simple service that helps dealing easily with the mailchimp api.
-     *
-     * @return Mailchimp Service for mailchimp.
-     */
-    protected function mailchimp()
+    protected function mailchimp(): Mailchimp
     {
         return $this->mailchimp;
     }

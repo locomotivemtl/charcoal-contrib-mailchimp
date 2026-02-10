@@ -2,43 +2,36 @@
 
 namespace Charcoal\Mailchimp\Resources;
 
+/**
+ * Mailchimp Lists API facade
+ *
+ * {@link https://developer.mailchimp.com/documentation/mailchimp/reference/lists/}
+ */
 class Lists extends Base
 {
-    const API_ENDPOINT = 'lists';
+    public const API_ENDPOINT = 'lists';
 
-    /**
-     * @var string
-     */
-    protected $listId;
+    protected ?string $listId = null;
 
-    /**
-     * @return string
-     */
-    public function listId()
+    public function listId(): ?string
     {
         return $this->listId;
     }
 
-    /**
-     * @param string $listId
-     * @return Lists
-     */
-    public function setListId($listId)
+    public function setListId(?string $listId): self
     {
         $this->listId = $listId;
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    protected function apiEndpoint()
+    protected function apiEndpoint(): string
     {
         if ($this->listId()) {
             return strtr(self::API_ENDPOINT . '/{list_id}', [
-                '{list_id}' => $this->listId()
+                '{list_id}' => $this->listId(),
             ]);
         }
+
         return self::API_ENDPOINT;
     }
 }

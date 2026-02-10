@@ -3,15 +3,19 @@
 namespace Charcoal\Mailchimp\Resources;
 
 use Charcoal\Mailchimp\Mixin\MailchimpAwareTrait;
+use Charcoal\Mailchimp\Service\Mailchimp;
 
+/**
+ * Mailchimp resource API facade
+ */
 class Base
 {
     use MailchimpAwareTrait;
 
     /**
-     * Members constructor.
-     *
-     * @param array $data
+     * @param array{
+     *     mailchimp: Mailchimp
+     * } $data
      */
     public function __construct(array $data)
     {
