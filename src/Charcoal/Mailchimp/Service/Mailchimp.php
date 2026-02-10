@@ -98,7 +98,7 @@ class Mailchimp
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Accept: application/vnd.api+json',
             'Content-Type: application/vnd.api+json',
-            strtr('Authorization: apikey %key', ['%key' => $key])
+            strtr('Authorization: apikey %key', ['%key' => $key]),
         ]);
 
         // Remove header from response

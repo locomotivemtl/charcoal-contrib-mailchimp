@@ -28,9 +28,7 @@ class Members extends Lists
         $endpoint .= self::API_ENDPOINT;
 
         if ($userHash) {
-            $endpoint = strtr($endpoint . '/{user_hash}', [
-                '{user_hash}' => $userHash,
-            ]);
+            $endpoint = strtr($endpoint . '/{user_hash}', ['{user_hash}' => $userHash]);
         }
 
         return $endpoint;

@@ -60,12 +60,12 @@ class MailchimpListInput extends MailchimpInput
             'value_pattern'    => '{{id}}',
             'label_pattern'    => '{{name}}',
             'subtext_pattern'  => 'Web ID: {{id}}',
-            'query_parameters' => []
+            'query_parameters' => [],
         ];
     }
 
     /**
-     * Formats response from mailchimp as seen here:
+     * Formats response from Mailchimp as seen here:
      *
      * {@link http://developer.mailchimp.com/documentation/mailchimp/reference/lists/}
      *

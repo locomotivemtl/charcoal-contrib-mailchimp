@@ -70,10 +70,10 @@ class MailchimpFormInput extends MailchimpInput
     protected function defaultOptions(): array
     {
         return [
-            'title_pattern'    => '{{header.text}}',
-            'value_pattern'    => '{{signup_form_url}}',
-            'label_pattern'    => '{{header.text}}',
-            'subtext_pattern'  => 'Form URL: {{signup_form_url}}',
+            'title_pattern'   => '{{header.text}}',
+            'value_pattern'   => '{{signup_form_url}}',
+            'label_pattern'   => '{{header.text}}',
+            'subtext_pattern' => 'Form URL: {{signup_form_url}}',
         ];
     }
 
@@ -124,7 +124,7 @@ class MailchimpFormInput extends MailchimpInput
         );
 
         // Get the available list from the Mailchimp API.
-        $forms = $this->mailchimp()->get($endpoint, []);
+        $forms = $this->mailchimp()->get($endpoint);
 
         foreach ($forms->signup_forms as $form) {
             $title   = $this->view()->renderTemplate($opts['title_pattern'], $form);
